@@ -31,16 +31,15 @@ public class xmlParser {
 
 
     static void dump(Element e) {
-        System.out.printf("Element: %s, %s, %s, %s%n", e.getNodeName(),
-                e.getLocalName(), e.getPrefix(),
-                e.getNamespaceURI());
+
+        System.out.printf("Element: %s, %s, %s, %s%n", e.getNodeName(), e.getLocalName(), e.getPrefix(), e.getNamespaceURI());
+
         NamedNodeMap nnm = e.getAttributes();
         if (nnm != null)
             for (int i = 0; i < nnm.getLength(); i++) {
                 Node node = nnm.item(i);
                 Attr attr = e.getAttributeNode(node.getNodeName());
-                System.out.printf("  Attribute %s = %s%n", attr.getName(),
-                        attr.getValue());
+                System.out.printf("  Attribute %s = %s%n", attr.getName(), attr.getValue());
             }
         NodeList nl = e.getChildNodes();
         for (int i = 0; i < nl.getLength(); i++) {
@@ -80,6 +79,13 @@ public class xmlParser {
 
         }
 
+
+
+        NodeList list = doc.getElementsByTagNameNS("http://www.elsevier.com/xml/ani/common","para");
+
+        System.out.println("What now: " + list.getLength());
+        System.out.println( ((Element)list.item(0)).getTextContent() );
+        System.out.println( ((Element)list.item(1)).getTextContent() );
     }
 
 
