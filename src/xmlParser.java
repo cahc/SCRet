@@ -86,6 +86,8 @@ public class xmlParser {
         System.out.println("What now: " + list.getLength());
         System.out.println( ((Element)list.item(0)).getTextContent() );
         System.out.println( ((Element)list.item(1)).getTextContent() );
+        System.out.println("");
+
     }
 
 
