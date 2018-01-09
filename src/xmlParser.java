@@ -4,6 +4,10 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 
 /**
@@ -52,14 +56,28 @@ public class xmlParser {
 
 
 
-    public static void main(String[] arg) throws ParserConfigurationException, IOException, SAXException {
+    public static void main(String[] arg) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
 
 
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
+       // documentBuilderFactory.setNamespaceAware(true); //TODO hmm...
         DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
-
         Document doc = db.parse( "C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS\\EXAMPLE1.xml" );
+
+
+        String expression = "/abstracts-retrieval-response/item/bibrecord/tail/bibliography";
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        NodeList nodes = (NodeList)xPath.evaluate(expression,doc,XPathConstants.NODESET);       // NodeList nodeList2 = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+
+        Node citedRefnode = nodes.item(0);
+
+        System.out.println("# of references: " + ((Element)citedRefnode).getAttribute("refcount") );
+
+        System.out.println("xpath # : " + nodes.getLength());
+
+        //dump( (Element) nodes.item(0) );
+
+        System.exit(0);
 
         System.out.println("Endcoding: " + doc.getXmlEncoding() );
 
@@ -87,6 +105,10 @@ public class xmlParser {
         System.out.println( ((Element)list.item(0)).getTextContent() );
         System.out.println( ((Element)list.item(1)).getTextContent() );
         System.out.println("");
+
+
+
+
 
     }
 
