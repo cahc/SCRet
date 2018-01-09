@@ -73,9 +73,7 @@ public class xmlParser {
 
         System.out.println("# of references: " + ((Element)citedRefnode).getAttribute("refcount") );
 
-        System.out.println("xpath # : " + nodes.getLength());
-
-        //dump( (Element) nodes.item(0) );
+        dump( (Element) citedRefnode );
 
         System.exit(0);
 
