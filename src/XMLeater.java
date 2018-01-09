@@ -4,16 +4,13 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.*;
 import java.io.IOException;
 
 /**
  * Created by crco0001 on 1/5/2018.
  */
-public class xmlParser {
+public class XMLeater {
 
 
     /*
@@ -32,6 +29,74 @@ public class xmlParser {
     public static final short NOTATION_NODE             = 12;
 
      */
+
+
+    private final XPath xpath;
+    private XPathExpression bibliographyExp;
+    private XPathExpression bibliographySourceTitleExp;
+    private XPathExpression coreDataExp;
+
+    private final Document doc;
+
+    public XMLeater(Document doc) throws XPathExpressionException {
+
+        this.xpath = XPathFactory.newInstance().newXPath();
+        this.doc = doc;
+
+
+        this.bibliographyExp = this.xpath.compile("/abstracts-retrieval-response/item/bibrecord/tail/bibliography");
+              this.bibliographySourceTitleExp = this.xpath.compile(".//ref-sourcetitle");
+
+
+        this.coreDataExp = this.xpath.compile("/abstracts-retrieval-response/coredata/*");
+
+    }
+
+    public void getCitedReferences() throws XPathExpressionException {
+
+
+        Node node = (Node)bibliographyExp.evaluate(this.doc,XPathConstants.NODE);
+
+        System.out.println("# of references: " + ((Element)node).getAttribute("refcount") );
+
+        NodeList refs = node.getChildNodes();
+
+       // System.out.println("# of references : " + refs.getLength());
+
+        for(int i=0; i<refs.getLength(); i++) {
+
+            Node ref = refs.item(i);
+            Node child = (Node) bibliographySourceTitleExp.evaluate(ref, XPathConstants.NODE);
+            System.out.println( ((Element)child).getTextContent() );
+
+
+        }
+
+    }
+
+
+    public void getCoreData() throws XPathExpressionException {
+
+        NodeList nodeList = (NodeList)coreDataExp.evaluate(this.doc,XPathConstants.NODESET);
+
+        System.out.println("# children: " + nodeList.getLength());
+
+        for(int i=0; i< nodeList.getLength(); i++) {
+
+            Node node = nodeList.item(i);
+
+            if( node.getNodeType() == Node.ELEMENT_NODE ) {
+
+                Element element = (Element)node;
+
+               if(  "eid".equals( element.getTagName() ) )  System.out.println( element.getTextContent() );
+
+
+            }
+
+        }
+
+    }
 
 
     static void dump(Element e) {
@@ -65,15 +130,26 @@ public class xmlParser {
         Document doc = db.parse( "C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS\\EXAMPLE1.xml" );
 
 
-        String expression = "/abstracts-retrieval-response/item/bibrecord/tail/bibliography";
-        XPath xPath = XPathFactory.newInstance().newXPath();
-        NodeList nodes = (NodeList)xPath.evaluate(expression,doc,XPathConstants.NODESET);       // NodeList nodeList2 = (NodeList) xPath.compile(expression).evaluate(doc, XPathConstants.NODESET);
+        XMLeater xmLeater = new XMLeater(doc);
 
-        Node citedRefnode = nodes.item(0);
+        xmLeater.getCitedReferences();
+        xmLeater.getCoreData();
 
-        System.out.println("# of references: " + ((Element)citedRefnode).getAttribute("refcount") );
 
-        dump( (Element) citedRefnode );
+
+
+
+
+        System.exit(0);
+
+
+        String bibliographyExp = "/abstracts-retrieval-response/item/bibrecord/tail/bibliography";
+        String scopusIdExp = "/abstracts-retrieval-response/coredata";
+
+
+
+
+
 
         System.exit(0);
 
