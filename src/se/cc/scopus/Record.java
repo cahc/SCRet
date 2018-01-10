@@ -18,7 +18,7 @@ public class Record {
     String URL;
     String language;
 
-    long sourceId;
+    String sourceId;
     int citedBy;
     int publicationYear;
 
@@ -89,11 +89,11 @@ public class Record {
         this.srctype = srctype;
     }
 
-    public long getSourceId() {
+    public String getSourceId() {
         return sourceId;
     }
 
-    public void setSourceId(long sourceId) {
+    public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
     }
 

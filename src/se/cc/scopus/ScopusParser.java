@@ -1,5 +1,6 @@
 package se.cc.scopus;
 
+import com.sun.org.apache.xpath.internal.NodeSet;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -8,6 +9,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by crco0001 on 1/5/2018.
@@ -46,7 +50,7 @@ public class ScopusParser {
         this.doc = doc;
 
 
-        this.bibliographyExp = this.xpath.compile("/abstracts-retrieval-response/item/bibrecord/tail/bibliography");
+        this.bibliographyExp = this.xpath.compile("/abstracts-retrieval-response/item/bibrecord/tail/bibliography/*");
               this.bibliographySourceTitleExp = this.xpath.compile(".//ref-sourcetitle");
 
 
@@ -54,27 +58,86 @@ public class ScopusParser {
         this.languageExp = this.xpath.compile("/abstracts-retrieval-response/language");
     }
 
-    public void getCitedReferences() throws XPathExpressionException {
+    public List<CitedReference> getCitedReferences() throws XPathExpressionException {
 
 
-        Node node = (Node)bibliographyExp.evaluate(this.doc,XPathConstants.NODE);
+        NodeList nodeList = (NodeList)bibliographyExp.evaluate(this.doc,XPathConstants.NODESET);
 
-        System.out.println("# of references: " + ((Element)node).getAttribute("refcount") );
+        System.out.println("# references: " + nodeList.getLength());
+        if(nodeList.getLength() == 0) return Collections.emptyList();
 
-        NodeList refs = node.getChildNodes();
+        List<CitedReference> citedReferenceList = new ArrayList<>();
 
-       // System.out.println("# of references : " + refs.getLength());
+        for(int i=0; i<nodeList.getLength(); i++) {
 
-        for(int i=0; i<refs.getLength(); i++) {
 
-            Node ref = refs.item(i);
-            Node child = (Node) bibliographySourceTitleExp.evaluate(ref, XPathConstants.NODE);
-            System.out.println( ((Element)child).getTextContent() );
+
+            Node node = nodeList.item(i);
+
+            if(node.getNodeType() == Node.ELEMENT_NODE &&  "reference".equals( ((Element)node).getTagName()) )   {
+
+                CitedReference citedReference = new CitedReference();
+
+                Element element = (Element)node;
+
+                String fulltext = (String)xpath.evaluate("ref-fulltext",element,XPathConstants.STRING);
+                citedReference.setRefFulltext(fulltext);
+
+                String title = (String)xpath.evaluate("ref-info/ref-title",element,XPathConstants.STRING);
+                citedReference.setRefTitle(title);
+
+                NodeList ids = (NodeList)xpath.evaluate("ref-info/refd-itemidlist/*",element,XPathConstants.NODESET);
+                for(int j=0; j<ids.getLength(); j++) {
+
+                    Node node1 = ids.item(j);
+                    String idtype = ((Element)node1).getAttribute("idtype");
+
+                    if("SGR".equals(idtype)) {
+                        citedReference.setRefIdType(idtype);
+                        citedReference.setRefID( node1.getTextContent() );
+                        break;
+                    }
+                }
+
+
+                String sourceTitle = (String)xpath.evaluate("ref-info/ref-sourcetitle",element,XPathConstants.STRING);
+                citedReference.setRefSourceTitle(sourceTitle);
+
+
+                Node refpubYear = (Node)xpath.evaluate("ref-info/ref-publicationyear",element,XPathConstants.NODE);
+                citedReference.setPubYear(  ((Element)refpubYear).getAttribute("first") );
+
+                Node firstRefAuthor = (Node)xpath.evaluate("ref-info/ref-authors/author[@seq=1][1]",element,XPathConstants.NODE);
+
+
+                if(firstRefAuthor != null) {
+
+                    Object indexedName = xpath.evaluate("indexed-name",firstRefAuthor,XPathConstants.STRING);
+
+                    if(  indexedName != null ) citedReference.setFirstAuthor(indexedName.toString());
+
+
+                } else {
+
+                    //maybe a collaboration?
+
+                    Node firstCollab = (Node)xpath.evaluate("ref-info/ref-authors/collaboration[@seq=1][1]",element,XPathConstants.NODE);
+
+                    if(firstCollab != null) citedReference.setFirstAuthor(firstCollab.getFirstChild().getTextContent());
+
+                }
+
+                citedReferenceList.add(citedReference);
+            }
+
 
 
         }
 
+
+        return citedReferenceList;
     }
+
 
 
     public Record getCoreData() throws XPathExpressionException {
@@ -113,7 +176,7 @@ public class ScopusParser {
 
                 if(  "prism:coverDate".equals( element.getTagName() ) )       record.setPublicationYear( Integer.valueOf( element.getTextContent().substring(0,4) ) );
 
-                if(  "source-id".equals( element.getTagName() ) )       record.setSourceId( Long.valueOf(element.getTextContent() ) );
+                if(  "source-id".equals( element.getTagName() ) )       record.setSourceId( element.getTextContent()  );
                 if(  "citedby-count".equals( element.getTagName() ) )       record.setCitedBy( Integer.valueOf(element.getTextContent() ) );
             }
 
@@ -166,8 +229,12 @@ public class ScopusParser {
 
         System.out.println(record);
 
+       List<CitedReference> test =  scopusParser.getCitedReferences();
 
+       for(CitedReference citedReference : test ) {
 
+           System.out.println(citedReference);
+       }
 
         /*
         For debugging:
