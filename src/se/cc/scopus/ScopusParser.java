@@ -188,6 +188,10 @@ public class ScopusParser {
         System.out.println("Extracting cited refs");
         List<CitedReference> citedRefs = getCitedReferences();
         record.setCitedReferences( citedRefs );
+        System.out.println("Extracting Standardized affiliations");
+        record.setStandardizedAffiliationList(getStandardizedAffiliations() );
+
+
 
 
         Node lang  = (Node)languageExp.evaluate(this.doc,XPathConstants.NODE);
@@ -262,13 +266,11 @@ public class ScopusParser {
 
         ScopusParser scopusParser = new ScopusParser(doc);
 
-        List<StandardizedAffiliation> test = scopusParser.getStandardizedAffiliations();
+        Record record =  scopusParser.getCoreData();
 
-        for(StandardizedAffiliation s : test) {
+        System.out.println( record.getNrStandardizedAffils() );
 
-            System.out.println(s);
 
-        }
         //Record record = scopusParser.getCoreData();
 
         //System.out.println(record.getNrRefs());

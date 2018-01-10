@@ -26,11 +26,27 @@ public class Record {
 
     List<Author> authorList;
     List<CitedReference> citedReferences;
+    List<StandardizedAffiliation> standardizedAffiliationList;
+
 
 
     public int getNrRefs() {
 
         return this.citedReferences.size();
+    }
+
+    public int getNrStandardizedAffils() {
+
+        return this.standardizedAffiliationList.size();
+    }
+
+
+    public List<StandardizedAffiliation> getStandardizedAffiliationList() {
+        return standardizedAffiliationList;
+    }
+
+    public void setStandardizedAffiliationList(List<StandardizedAffiliation> standardizedAffiliationList) {
+        this.standardizedAffiliationList = standardizedAffiliationList;
     }
 
     public List<CitedReference> getCitedReferences() {
