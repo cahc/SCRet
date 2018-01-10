@@ -1,3 +1,5 @@
+package se.cc.scopus;
+
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -10,7 +12,7 @@ import java.io.IOException;
 /**
  * Created by crco0001 on 1/5/2018.
  */
-public class XMLeater {
+public class ScopusParser {
 
 
     /*
@@ -35,10 +37,10 @@ public class XMLeater {
     private XPathExpression bibliographyExp;
     private XPathExpression bibliographySourceTitleExp;
     private XPathExpression coreDataExp;
-
+    private XPathExpression languageExp;
     private final Document doc;
 
-    public XMLeater(Document doc) throws XPathExpressionException {
+    public ScopusParser(Document doc) throws XPathExpressionException {
 
         this.xpath = XPathFactory.newInstance().newXPath();
         this.doc = doc;
@@ -49,7 +51,7 @@ public class XMLeater {
 
 
         this.coreDataExp = this.xpath.compile("/abstracts-retrieval-response/coredata/*");
-
+        this.languageExp = this.xpath.compile("/abstracts-retrieval-response/language");
     }
 
     public void getCitedReferences() throws XPathExpressionException {
@@ -75,11 +77,12 @@ public class XMLeater {
     }
 
 
-    public void getCoreData() throws XPathExpressionException {
+    public Record getCoreData() throws XPathExpressionException {
 
         NodeList nodeList = (NodeList)coreDataExp.evaluate(this.doc,XPathConstants.NODESET);
 
         System.out.println("# children: " + nodeList.getLength());
+        Record record = new Record();
 
         for(int i=0; i< nodeList.getLength(); i++) {
 
@@ -87,15 +90,42 @@ public class XMLeater {
 
             if( node.getNodeType() == Node.ELEMENT_NODE ) {
 
+
                 Element element = (Element)node;
+                //System.out.println(element.getTagName());
 
-               if(  "eid".equals( element.getTagName() ) )  System.out.println( element.getTextContent() );
+                if(  "prism:url".equals( element.getTagName() ) )               record.setURL(element.getTextContent() );
+
+                if(  "eid".equals( element.getTagName() ) )                     record.setEid( element.getTextContent() );
+                if(  "prism:doi".equals( element.getTagName() ) )               record.setDoi( element.getTextContent() );
+                if(  "dc:title".equals( element.getTagName() ) )                record.setTitle( element.getTextContent() );
+                if(  "srctype".equals( element.getTagName() ) )                 record.setSrctype( element.getTextContent() );
+
+                if(  "dc:description".equals( element.getTagName() ) )  {
+
+                   Object summary = xpath.evaluate("abstract/para",node,XPathConstants.STRING);
+
+                   if(summary != null)                                        record.setSummaryText((String)summary);
+                }
 
 
+                if(  "prism:publicationName".equals( element.getTagName() ) ) record.setPublicationName( element.getTextContent() );
+
+                if(  "prism:coverDate".equals( element.getTagName() ) )       record.setPublicationYear( Integer.valueOf( element.getTextContent().substring(0,4) ) );
+
+                if(  "source-id".equals( element.getTagName() ) )       record.setSourceId( Long.valueOf(element.getTextContent() ) );
+                if(  "citedby-count".equals( element.getTagName() ) )       record.setCitedBy( Integer.valueOf(element.getTextContent() ) );
             }
 
         }
 
+
+        //finally add lang that is not part of coredata
+        Node lang  = (Node)languageExp.evaluate(this.doc,XPathConstants.NODE);
+        if(lang != null) record.setLanguage( ((Element)lang).getAttribute("xml:lang") );
+
+
+        return record;
     }
 
 
@@ -127,31 +157,20 @@ public class XMLeater {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
        // documentBuilderFactory.setNamespaceAware(true); //TODO hmm...
         DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
-        Document doc = db.parse( "C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS\\EXAMPLE1.xml" );
+        Document doc = db.parse( "C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS\\EXAMPLE3.xml" );
 
 
-        XMLeater xmLeater = new XMLeater(doc);
+        ScopusParser scopusParser = new ScopusParser(doc);
 
-        xmLeater.getCitedReferences();
-        xmLeater.getCoreData();
+        Record record = scopusParser.getCoreData();
 
-
-
-
-
-
-        System.exit(0);
-
-
-        String bibliographyExp = "/abstracts-retrieval-response/item/bibrecord/tail/bibliography";
-        String scopusIdExp = "/abstracts-retrieval-response/coredata";
+        System.out.println(record);
 
 
 
 
-
-
-        System.exit(0);
+        /*
+        For debugging:
 
         System.out.println("Endcoding: " + doc.getXmlEncoding() );
 
@@ -171,16 +190,7 @@ public class XMLeater {
 
         }
 
-
-
-        NodeList list = doc.getElementsByTagNameNS("http://www.elsevier.com/xml/ani/common","para");
-
-        System.out.println("What now: " + list.getLength());
-        System.out.println( ((Element)list.item(0)).getTextContent() );
-        System.out.println( ((Element)list.item(1)).getTextContent() );
-        System.out.println("");
-
-
+        */
 
 
 
