@@ -42,6 +42,7 @@ public class ScopusParser {
     private XPathExpression bibliographySourceTitleExp;
     private XPathExpression coreDataExp;
     private XPathExpression languageExp;
+    private XPathExpression standardizedAffiliationsEXp;
     private final Document doc;
 
     public ScopusParser(Document doc) throws XPathExpressionException {
@@ -51,11 +52,12 @@ public class ScopusParser {
 
 
         this.bibliographyExp = this.xpath.compile("/abstracts-retrieval-response/item/bibrecord/tail/bibliography/*");
-              this.bibliographySourceTitleExp = this.xpath.compile(".//ref-sourcetitle");
+        this.bibliographySourceTitleExp = this.xpath.compile(".//ref-sourcetitle");
 
 
         this.coreDataExp = this.xpath.compile("/abstracts-retrieval-response/coredata/*");
         this.languageExp = this.xpath.compile("/abstracts-retrieval-response/language");
+        this.standardizedAffiliationsEXp = this.xpath.compile("/abstracts-retrieval-response/affiliation");
     }
 
     public List<CitedReference> getCitedReferences() throws XPathExpressionException {
@@ -63,7 +65,6 @@ public class ScopusParser {
 
         NodeList nodeList = (NodeList)bibliographyExp.evaluate(this.doc,XPathConstants.NODESET);
 
-        System.out.println("# references: " + nodeList.getLength());
         if(nodeList.getLength() == 0) return Collections.emptyList();
 
         List<CitedReference> citedReferenceList = new ArrayList<>();
@@ -139,12 +140,11 @@ public class ScopusParser {
     }
 
 
-
     public Record getCoreData() throws XPathExpressionException {
 
         NodeList nodeList = (NodeList)coreDataExp.evaluate(this.doc,XPathConstants.NODESET);
 
-        System.out.println("# children: " + nodeList.getLength());
+        System.out.println("Extracting core data");
         Record record = new Record();
 
         for(int i=0; i< nodeList.getLength(); i++) {
@@ -184,12 +184,49 @@ public class ScopusParser {
 
 
         //finally add lang that is not part of coredata
+
+        System.out.println("Extracting cited refs");
+        List<CitedReference> citedRefs = getCitedReferences();
+        record.setCitedReferences( citedRefs );
+
+
         Node lang  = (Node)languageExp.evaluate(this.doc,XPathConstants.NODE);
         if(lang != null) record.setLanguage( ((Element)lang).getAttribute("xml:lang") );
 
 
         return record;
     }
+
+    public List<StandardizedAffiliation> getStandardizedAffiliations() throws XPathExpressionException {
+
+       NodeList nodeList =  (NodeList)this.standardizedAffiliationsEXp.evaluate(this.doc,XPathConstants.NODESET);
+       List<StandardizedAffiliation> standardizedAffiliationList = new ArrayList<>();
+       if(nodeList.getLength() == 0) return Collections.emptyList();
+
+       for(int i=0; i<nodeList.getLength(); i++) {
+
+           StandardizedAffiliation standardizedAffiliation = new StandardizedAffiliation();
+
+           Element element =  (Element)nodeList.item(i);
+           standardizedAffiliation.setAfid( element.getAttribute("id") );
+           Object affiliation = ( xpath.evaluate("affilname",element,XPathConstants.STRING) );
+           Object city =( xpath.evaluate("affiliation-city",element,XPathConstants.STRING) );
+           Object country =( xpath.evaluate("affiliation-country",element,XPathConstants.STRING) );
+
+
+           if(affiliation != null) standardizedAffiliation.setAffiliation( affiliation.toString());
+           if(city != null) standardizedAffiliation.setAffiliationCity( city.toString());
+           if(country != null) standardizedAffiliation.setAffiliationCountry( country.toString());
+
+           standardizedAffiliationList.add(standardizedAffiliation);
+
+       }
+
+
+
+        return standardizedAffiliationList;
+    }
+
 
 
     static void dump(Element e) {
@@ -225,16 +262,18 @@ public class ScopusParser {
 
         ScopusParser scopusParser = new ScopusParser(doc);
 
-        Record record = scopusParser.getCoreData();
+        List<StandardizedAffiliation> test = scopusParser.getStandardizedAffiliations();
 
-        System.out.println(record);
+        for(StandardizedAffiliation s : test) {
 
-       List<CitedReference> test =  scopusParser.getCitedReferences();
+            System.out.println(s);
 
-       for(CitedReference citedReference : test ) {
+        }
+        //Record record = scopusParser.getCoreData();
 
-           System.out.println(citedReference);
-       }
+        //System.out.println(record.getNrRefs());
+
+
 
         /*
         For debugging:

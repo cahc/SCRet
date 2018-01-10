@@ -23,7 +23,23 @@ public class Record {
     int publicationYear;
 
 
+
     List<Author> authorList;
+    List<CitedReference> citedReferences;
+
+
+    public int getNrRefs() {
+
+        return this.citedReferences.size();
+    }
+
+    public List<CitedReference> getCitedReferences() {
+        return citedReferences;
+    }
+
+    public void setCitedReferences(List<CitedReference> citedReferences) {
+        this.citedReferences = citedReferences;
+    }
 
     public String getURL() {
         return URL;
