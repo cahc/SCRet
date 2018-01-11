@@ -1,23 +1,26 @@
 package se.cc.scopus;
 
+import java.util.List;
+
 /**
  * Created by crco0001 on 1/10/2018.
  */
 public class Author {
 
-   private  long auid;
+   private  String auid;
    private  int seq;
    private  String initials;
    private  String surnNme;
    private  String giveNname;
-   private  long mainAffiliationID;
+
+   private List<AffiliationLevel2> affiliationsLevel2;
 
 
-    public long getAuid() {
+    public String getAuid() {
         return auid;
     }
 
-    public void setAuid(long auid) {
+    public void setAuid(String auid) {
         this.auid = auid;
     }
 
@@ -53,11 +56,24 @@ public class Author {
         this.giveNname = giveNname;
     }
 
-    public long getMainAffiliationID() {
-        return mainAffiliationID;
+    public List<AffiliationLevel2> getAffiliationsLevel2() {
+        return affiliationsLevel2;
     }
 
-    public void setMainAffiliationID(long mainAffiliationID) {
-        this.mainAffiliationID = mainAffiliationID;
+    public void setAffiliationsLevel2(List<AffiliationLevel2> affiliationsLevel2) {
+        this.affiliationsLevel2 = affiliationsLevel2;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Author{" +
+                "auid=" + auid +
+                ", seq=" + seq +
+                ", initials='" + initials + '\'' +
+                ", surnNme='" + surnNme + '\'' +
+                ", giveNname='" + giveNname + '\'' +
+                ", affiliationsLevel2=" + affiliationsLevel2 +
+                '}';
     }
 }

@@ -1,6 +1,5 @@
 package se.cc.scopus;
 
-import com.sun.org.apache.xpath.internal.NodeSet;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -43,6 +42,7 @@ public class ScopusParser {
     private XPathExpression coreDataExp;
     private XPathExpression languageExp;
     private XPathExpression standardizedAffiliationsEXp;
+    private XPathExpression authorGroupEXp;
     private final Document doc;
 
     public ScopusParser(Document doc) throws XPathExpressionException {
@@ -58,6 +58,9 @@ public class ScopusParser {
         this.coreDataExp = this.xpath.compile("/abstracts-retrieval-response/coredata/*");
         this.languageExp = this.xpath.compile("/abstracts-retrieval-response/language");
         this.standardizedAffiliationsEXp = this.xpath.compile("/abstracts-retrieval-response/affiliation");
+
+        this.authorGroupEXp = this.xpath.compile ("/abstracts-retrieval-response/item/bibrecord/head/author-group");
+
     }
 
     public List<CitedReference> getCitedReferences() throws XPathExpressionException {
@@ -189,7 +192,7 @@ public class ScopusParser {
         List<CitedReference> citedRefs = getCitedReferences();
         record.setCitedReferences( citedRefs );
         System.out.println("Extracting Standardized affiliations");
-        record.setStandardizedAffiliationList(getStandardizedAffiliations() );
+        record.setAffiliationLevel1List(getStandardizedAffiliations() );
 
 
 
@@ -201,36 +204,53 @@ public class ScopusParser {
         return record;
     }
 
-    public List<StandardizedAffiliation> getStandardizedAffiliations() throws XPathExpressionException {
+    public List<AffiliationLevel1> getStandardizedAffiliations() throws XPathExpressionException {
 
        NodeList nodeList =  (NodeList)this.standardizedAffiliationsEXp.evaluate(this.doc,XPathConstants.NODESET);
-       List<StandardizedAffiliation> standardizedAffiliationList = new ArrayList<>();
+       List<AffiliationLevel1> affiliationLevel1List = new ArrayList<>();
        if(nodeList.getLength() == 0) return Collections.emptyList();
 
        for(int i=0; i<nodeList.getLength(); i++) {
 
-           StandardizedAffiliation standardizedAffiliation = new StandardizedAffiliation();
+           AffiliationLevel1 affiliationLevel1 = new AffiliationLevel1();
 
            Element element =  (Element)nodeList.item(i);
-           standardizedAffiliation.setAfid( element.getAttribute("id") );
+           affiliationLevel1.setAfid( element.getAttribute("id") );
            Object affiliation = ( xpath.evaluate("affilname",element,XPathConstants.STRING) );
            Object city =( xpath.evaluate("affiliation-city",element,XPathConstants.STRING) );
            Object country =( xpath.evaluate("affiliation-country",element,XPathConstants.STRING) );
 
 
-           if(affiliation != null) standardizedAffiliation.setAffiliation( affiliation.toString());
-           if(city != null) standardizedAffiliation.setAffiliationCity( city.toString());
-           if(country != null) standardizedAffiliation.setAffiliationCountry( country.toString());
+           if(affiliation != null) affiliationLevel1.setAffiliation( affiliation.toString());
+           if(city != null) affiliationLevel1.setAffiliationCity( city.toString());
+           if(country != null) affiliationLevel1.setAffiliationCountry( country.toString());
 
-           standardizedAffiliationList.add(standardizedAffiliation);
+           affiliationLevel1List.add(affiliationLevel1);
 
        }
 
 
 
-        return standardizedAffiliationList;
+        return affiliationLevel1List;
     }
 
+
+    public List<Author> getAuthors() throws XPathExpressionException {
+
+        NodeList nodeList = (NodeList)authorGroupEXp.evaluate(this.doc,XPathConstants.NODESET);
+
+        System.out.println("Author groups: " + nodeList.getLength());
+
+        for(int i=0; i<nodeList.getLength(); i++) {
+
+
+
+        }
+
+
+        return Collections.emptyList();
+
+    }
 
 
     static void dump(Element e) {
@@ -266,9 +286,11 @@ public class ScopusParser {
 
         ScopusParser scopusParser = new ScopusParser(doc);
 
-        Record record =  scopusParser.getCoreData();
+        scopusParser.getAuthors();
 
-        System.out.println( record.getNrStandardizedAffils() );
+        //Record record =  scopusParser.getCoreData();
+
+        //System.out.println( record.getAffiliationLevel1List() );
 
 
         //Record record = scopusParser.getCoreData();

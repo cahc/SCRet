@@ -26,7 +26,7 @@ public class Record {
 
     List<Author> authorList;
     List<CitedReference> citedReferences;
-    List<StandardizedAffiliation> standardizedAffiliationList;
+    List<AffiliationLevel1> affiliationLevel1List;
 
 
 
@@ -37,16 +37,16 @@ public class Record {
 
     public int getNrStandardizedAffils() {
 
-        return this.standardizedAffiliationList.size();
+        return this.affiliationLevel1List.size();
     }
 
 
-    public List<StandardizedAffiliation> getStandardizedAffiliationList() {
-        return standardizedAffiliationList;
+    public List<AffiliationLevel1> getAffiliationLevel1List() {
+        return affiliationLevel1List;
     }
 
-    public void setStandardizedAffiliationList(List<StandardizedAffiliation> standardizedAffiliationList) {
-        this.standardizedAffiliationList = standardizedAffiliationList;
+    public void setAffiliationLevel1List(List<AffiliationLevel1> affiliationLevel1List) {
+        this.affiliationLevel1List = affiliationLevel1List;
     }
 
     public List<CitedReference> getCitedReferences() {

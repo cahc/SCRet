@@ -3,7 +3,7 @@ package se.cc.scopus;
 /**
  * Created by crco0001 on 1/10/2018.
  */
-public class StandardizedAffiliation {
+public class AffiliationLevel1 {
 
 
     String afid;
@@ -47,7 +47,7 @@ public class StandardizedAffiliation {
 
     @Override
     public String toString() {
-        return "StandardizedAffiliation{" +
+        return "AffiliationLevel1{" +
                 "afid='" + afid + '\'' +
                 ", affiliation='" + affiliation + '\'' +
                 ", affiliationCity='" + affiliationCity + '\'' +
