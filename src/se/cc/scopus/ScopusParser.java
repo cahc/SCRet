@@ -8,9 +8,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by crco0001 on 1/5/2018.
@@ -43,6 +41,8 @@ public class ScopusParser {
     private XPathExpression languageExp;
     private XPathExpression standardizedAffiliationsEXp;
     private XPathExpression authorGroupEXp;
+    private XPathExpression indexTermsExp;
+    private XPathExpression authorKeywordsExp;
     private final Document doc;
 
     public ScopusParser(Document doc) throws XPathExpressionException {
@@ -60,6 +60,8 @@ public class ScopusParser {
         this.standardizedAffiliationsEXp = this.xpath.compile("/abstracts-retrieval-response/affiliation");
 
         this.authorGroupEXp = this.xpath.compile ("/abstracts-retrieval-response/item/bibrecord/head/author-group");
+        this.indexTermsExp = this.xpath.compile ("/abstracts-retrieval-response/idxterms/*");
+        this.authorKeywordsExp = this.xpath.compile ("/abstracts-retrieval-response/authkeywords/*");
 
     }
 
@@ -193,12 +195,20 @@ public class ScopusParser {
         record.setCitedReferences( citedRefs );
         System.out.println("Extracting Standardized affiliations");
         record.setAffiliationLevel1List(getStandardizedAffiliations() );
-
-
-
+        System.out.println("Extracting authors and affiliations");
+        List<Author> authorList = getAuthors();
+        record.setAuthorList(authorList);
 
         Node lang  = (Node)languageExp.evaluate(this.doc,XPathConstants.NODE);
         if(lang != null) record.setLanguage( ((Element)lang).getAttribute("xml:lang") );
+
+       NodeList indexTermNodes =  (NodeList)indexTermsExp.evaluate(this.doc,XPathConstants.NODESET);
+
+       for(int i=0; i<indexTermNodes.getLength(); i++) record.addIndexTerms(  indexTermNodes.item(i).getTextContent()  );
+
+        NodeList authorKeywordsNodes =  (NodeList)authorKeywordsExp.evaluate(this.doc,XPathConstants.NODESET);
+
+      for(int i=0; i<authorKeywordsNodes.getLength(); i++) record.addAuthorKeyword(  authorKeywordsNodes.item(i).getTextContent()  );
 
 
         return record;
@@ -237,18 +247,87 @@ public class ScopusParser {
 
     public List<Author> getAuthors() throws XPathExpressionException {
 
+        List<Author> authorList = new ArrayList<>();
+
         NodeList nodeList = (NodeList)authorGroupEXp.evaluate(this.doc,XPathConstants.NODESET);
 
-        System.out.println("Author groups: " + nodeList.getLength());
+        //System.out.println("Author groups: " + nodeList.getLength());
+
+        HashMap<String,Author> authorHashMap = new HashMap<>();
 
         for(int i=0; i<nodeList.getLength(); i++) {
 
+            Node authorGroup = nodeList.item(i);
+
+            Element affiliation = (Element)xpath.evaluate("affiliation",authorGroup,XPathConstants.NODE);
+            AffiliationLevel2 affiliationLevel2 = null;
+            if(affiliation != null) {
+
+                affiliationLevel2 = new AffiliationLevel2();
+
+                affiliationLevel2.setAfid(affiliation.getAttribute("afid"));
+
+                affiliationLevel2.setDptid(affiliation.getAttribute("dptid"));
+
+               NodeList organizations =  (NodeList)xpath.evaluate("organization",affiliation,XPathConstants.NODESET);
+               for(int j=0; j<organizations.getLength(); j++) affiliationLevel2.addOrganisations( organizations.item(j).getTextContent() );
+
+                affiliationLevel2.setCity( (String)xpath.evaluate("city",affiliation,XPathConstants.STRING) );
+                affiliationLevel2.setCountry( (String)xpath.evaluate("country",affiliation,XPathConstants.STRING) );
+
+            }
+
+          //  System.out.println(affiliationLevel2);
+
+            //process the authors in the author_group
+            // an author can in several authorgroups depending on # affiliations
+
+            NodeList authors = (NodeList)xpath.evaluate("author",authorGroup,XPathConstants.NODESET);
+
+            for(int aut=0; aut<authors.getLength(); aut++ ) {
+
+                Element authorInSeq = (Element)authors.item(aut);
+
+                String auid = authorInSeq.getAttribute("auid");
+                String seq = authorInSeq.getAttribute("seq");
+                Author author = authorHashMap.get(auid);
 
 
-        }
+
+                if(author == null) {
+
+                  String initials = (String)xpath.evaluate("initials",authorInSeq,XPathConstants.STRING);
+                    String surname = (String)xpath.evaluate("surname",authorInSeq,XPathConstants.STRING);
+                    String givenname = (String)xpath.evaluate("given-name",authorInSeq,XPathConstants.STRING);
 
 
-        return Collections.emptyList();
+                   author = new Author();
+                   author.setAuid(auid);
+                   author.setSeq(Integer.valueOf(seq));
+                   author.setGiveNname(givenname);
+                   author.setInitials(initials);
+                   author.setSurnNme(surname);
+                   author.addAffiliationsLevel2(affiliationLevel2);
+                   authorHashMap.put(auid,author);
+
+                } else {
+
+                    author.addAffiliationsLevel2(affiliationLevel2);
+
+                }
+
+
+            } //for each author in author-group
+
+
+
+
+
+        } //next author_group node
+
+        authorList.addAll(authorHashMap.values() );
+
+        return authorList;
 
     }
 
@@ -281,23 +360,18 @@ public class ScopusParser {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
        // documentBuilderFactory.setNamespaceAware(true); //TODO hmm...
         DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
-        Document doc = db.parse( "C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS\\EXAMPLE3.xml" );
+        Document doc = db.parse( "C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS\\EXAMPLE1.xml" );
 
 
         ScopusParser scopusParser = new ScopusParser(doc);
 
-        scopusParser.getAuthors();
-
-        //Record record =  scopusParser.getCoreData();
-
-        //System.out.println( record.getAffiliationLevel1List() );
+        Record record = scopusParser.getCoreData();
 
 
-        //Record record = scopusParser.getCoreData();
-
-        //System.out.println(record.getNrRefs());
-
-
+        System.out.println(record.getAuthorKeywords());
+        System.out.println(record.getIndexTerms() );
+        System.out.println(record.getAuthorList());
+        System.out.println(record.getTitle());
 
         /*
         For debugging:

@@ -1,5 +1,6 @@
 package se.cc.scopus;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ public class Author {
    private  String surnNme;
    private  String giveNname;
 
-   private List<AffiliationLevel2> affiliationsLevel2;
+   private List<AffiliationLevel2> affiliationsLevel2 = new ArrayList<>(2);
 
 
     public String getAuid() {
@@ -60,8 +61,8 @@ public class Author {
         return affiliationsLevel2;
     }
 
-    public void setAffiliationsLevel2(List<AffiliationLevel2> affiliationsLevel2) {
-        this.affiliationsLevel2 = affiliationsLevel2;
+    public void addAffiliationsLevel2(AffiliationLevel2 affiliationsLevel2) {
+        this.affiliationsLevel2.add(affiliationsLevel2);
     }
 
 
@@ -75,5 +76,21 @@ public class Author {
                 ", giveNname='" + giveNname + '\'' +
                 ", affiliationsLevel2=" + affiliationsLevel2 +
                 '}';
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Author author = (Author) o;
+
+        return auid != null ? auid.equals(author.auid) : author.auid == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return auid != null ? auid.hashCode() : 0;
     }
 }

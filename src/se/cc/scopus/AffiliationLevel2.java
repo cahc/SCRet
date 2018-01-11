@@ -1,5 +1,6 @@
 package se.cc.scopus;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -7,11 +8,11 @@ import java.util.List;
  */
 public class AffiliationLevel2 {
 
-    String afid;
-    String dptid;
-    List<String> organisations;
-    String city;
-    String country;
+    private String afid;
+    private String dptid;
+    private List<String> organisations = new ArrayList<>(2);
+    private String city;
+    private String country;
 
 
     public String getAfid() {
@@ -34,8 +35,8 @@ public class AffiliationLevel2 {
         return organisations;
     }
 
-    public void setOrganisations(List<String> organisations) {
-        this.organisations = organisations;
+    public void addOrganisations(String organisation) {
+        this.organisations.add(organisation);
     }
 
     public String getCity() {

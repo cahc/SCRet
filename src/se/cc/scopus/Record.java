@@ -1,5 +1,6 @@
 package se.cc.scopus;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,26 +10,59 @@ public class Record {
 
 
     //from <coredata>
-    String eid;
-    String doi;
-    String title;
-    String summaryText; //abstract..
-    String publicationName;
-    String srctype;
-    String URL;
-    String language;
+    private String eid;
+    private String doi;
+    private String title;
+    private String summaryText; //abstract..
+    private String publicationName;
+    private String srctype;
+    private String URL;
+    private String language;
 
-    String sourceId;
-    int citedBy;
-    int publicationYear;
-
-
-
-    List<Author> authorList;
-    List<CitedReference> citedReferences;
-    List<AffiliationLevel1> affiliationLevel1List;
+    private String sourceId;
+    private int citedBy;
+    private int publicationYear;
 
 
+
+    private List<Author> authorList;
+    private List<CitedReference> citedReferences;
+    private List<AffiliationLevel1> affiliationLevel1List;
+    private List<String> authorKeywords;
+    private List<String> indexTerms;
+
+
+    public List<String> getAuthorKeywords() {
+        return authorKeywords;
+    }
+
+    public void addAuthorKeyword(String keyword) {
+
+        if(authorKeywords == null) authorKeywords = new ArrayList<>();
+
+        authorKeywords.add(keyword);
+
+    }
+
+
+    public void addIndexTerms(String term) {
+
+        if(indexTerms == null) indexTerms = new ArrayList<>();
+        this.indexTerms.add(term);
+
+
+    }
+    public void setAuthorKeywords(List<String> authorKeywords) {
+        this.authorKeywords = authorKeywords;
+    }
+
+    public List<String> getIndexTerms() {
+        return indexTerms;
+    }
+
+    public void setIndexTerms(List<String> indexTerms) {
+        this.indexTerms = indexTerms;
+    }
 
     public int getNrRefs() {
 
