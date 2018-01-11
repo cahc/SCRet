@@ -51,7 +51,6 @@ public class xmlParser {
 
 
 
-
     public static void main(String[] arg) throws ParserConfigurationException, IOException, SAXException {
 
 
@@ -59,7 +58,10 @@ public class xmlParser {
         documentBuilderFactory.setNamespaceAware(true);
         DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
 
-        Document doc = db.parse( "C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS\\EXAMPLE1.xml" );
+        //Document doc = db.parse( "C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS\\EXAMPLE1.xml" );
+
+
+        Document doc = db.parse( "/Users/Cristian/Desktop/SCOPUS_XML_PARSE/EXAMPLE1.xml" );
 
         System.out.println("Endcoding: " + doc.getXmlEncoding() );
 
