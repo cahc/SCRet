@@ -361,7 +361,7 @@ public class ScopusParser {
        // documentBuilderFactory.setNamespaceAware(true); //TODO hmm...
         DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
 
-//        Document doc = db.parse( "C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS\\EXAMPLE1.xml" );
+            //Document doc = db.parse( "C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS\\EXAMPLE1.xml" );
           Document doc = db.parse( "/Users/Cristian/Desktop/SCOPUS_XML_PARSE/EXAMPLE1.xml" );
 
         ScopusParser scopusParser = new ScopusParser(doc);
