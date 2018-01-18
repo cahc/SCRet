@@ -1,6 +1,7 @@
 package se.cc.scopus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,7 +34,7 @@ public class Record {
 
 
     public List<String> getAuthorKeywords() {
-        return authorKeywords;
+        return (authorKeywords==null) ? Collections.emptyList() : authorKeywords;
     }
 
     public void addAuthorKeyword(String keyword) {
@@ -57,7 +58,7 @@ public class Record {
     }
 
     public List<String> getIndexTerms() {
-        return indexTerms;
+        return (indexTerms==null) ? Collections.emptyList() : indexTerms;
     }
 
     public void setIndexTerms(List<String> indexTerms) {
@@ -72,11 +73,12 @@ public class Record {
     public int getNrStandardizedAffils() {
 
         return this.affiliationLevel1List.size();
+
     }
 
 
     public List<AffiliationLevel1> getAffiliationLevel1List() {
-        return affiliationLevel1List;
+        return (affiliationLevel1List==null) ? Collections.emptyList() : affiliationLevel1List;
     }
 
     public void setAffiliationLevel1List(List<AffiliationLevel1> affiliationLevel1List) {
@@ -84,7 +86,7 @@ public class Record {
     }
 
     public List<CitedReference> getCitedReferences() {
-        return citedReferences;
+        return (citedReferences==null) ? Collections.emptyList() : citedReferences;
     }
 
     public void setCitedReferences(List<CitedReference> citedReferences) {
@@ -180,7 +182,8 @@ public class Record {
     }
 
     public List<Author> getAuthorList() {
-        return authorList;
+
+        return (authorList == null) ? Collections.emptyList() : authorList;
     }
 
     public void setAuthorList(List<Author> authorList) {
