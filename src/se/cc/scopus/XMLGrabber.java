@@ -14,10 +14,14 @@ public class XMLGrabber {
 
     OkHttpClient client = new OkHttpClient();
 
-    public XMLGrabber() {
+    public XMLGrabber(boolean useLocalProxy) {
 
-        System.setProperty("http.proxyHost", "127.0.0.1");
-        System.setProperty("http.proxyPort", "8888");
+        if(useLocalProxy) {
+
+            System.setProperty("http.proxyHost", "127.0.0.1");
+            System.setProperty("http.proxyPort", "8888");
+
+        }
 
    System.setProperty("https.proxyHost", "127.0.0.1");System.setProperty("https.proxyPort", "8888");
 
@@ -43,7 +47,7 @@ public class XMLGrabber {
 
 
     public static void main(String[] args) throws IOException {
-        XMLGrabber client = new XMLGrabber();
+        XMLGrabber client = new XMLGrabber(false);
 
        // String url = client.generatURL("2-s2.0-58149466160","7f59af901d2d86f78a1fd60c1bf9426a");
         String response = client.run("https://www.google.se");
