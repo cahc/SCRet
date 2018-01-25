@@ -7,6 +7,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.*;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.*;
 
@@ -44,6 +46,26 @@ public class ScopusParser {
     private XPathExpression indexTermsExp;
     private XPathExpression authorKeywordsExp;
     private final Document doc;
+
+    public static File[] acceptedFileNames(File directory ) {
+
+        FilenameFilter filter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+
+                if(name.matches(".*2-s2\\.0-[0-9]{4,25}.*\\.xml")) return true;
+
+                return false;
+            }
+        };
+
+
+
+
+        return directory.listFiles(filter);
+
+
+    }
 
     public ScopusParser(Document doc) throws XPathExpressionException {
 
@@ -109,9 +131,9 @@ public class ScopusParser {
                 String sourceTitle = (String)xpath.evaluate("ref-info/ref-sourcetitle",element,XPathConstants.STRING);
                 citedReference.setRefSourceTitle(sourceTitle);
 
-
                 Node refpubYear = (Node)xpath.evaluate("ref-info/ref-publicationyear",element,XPathConstants.NODE);
-                citedReference.setPubYear(  ((Element)refpubYear).getAttribute("first") );
+
+                if(refpubYear != null) citedReference.setPubYear(  ((Element)refpubYear).getAttribute("first") );
 
                 Node firstRefAuthor = (Node)xpath.evaluate("ref-info/ref-authors/author[@seq=1][1]",element,XPathConstants.NODE);
 
@@ -357,22 +379,40 @@ public class ScopusParser {
     public static void main(String[] arg) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
 
 
+       File[] eidFiles =ScopusParser.acceptedFileNames(new File("C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS"));
+
+
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-       // documentBuilderFactory.setNamespaceAware(true); //TODO hmm...
+       // documentBuilderFactory.setNamespaceAware(true);
         DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
 
-            //Document doc = db.parse( "C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS\\EXAMPLE1.xml" );
-          Document doc = db.parse( "/Users/Cristian/Desktop/SCOPUS_XML_PARSE/EXAMPLE1.xml" );
+        for(File file : eidFiles) {
 
-        ScopusParser scopusParser = new ScopusParser(doc);
+            System.out.println("Parsing file: " + file.toString());
 
-        Record record = scopusParser.getCoreData();
+            Document doc = db.parse(file);
+            ScopusParser scopusParser = new ScopusParser(doc);
+            Record record = scopusParser.getCoreData();
+
+           // System.out.println(record.getAuthorKeywords());
+          //  System.out.println(record.getIndexTerms() );
+         //   System.out.println(record.getAuthorList());
+          //  System.out.println(record.getTitle());
+
+            System.out.println(record);
+            System.out.println("##########");
+        }
+        //Document doc = db.parse( "C:\\Users\\crco0001\\Desktop\\PARSE_SCOPUS\\EXAMPLE1.xml" );
+       // Document doc = db.parse( "/Users/Cristian/Desktop/SCOPUS_XML_PARSE/EXAMPLE1.xml" );
+
+        //ScopusParser scopusParser = new ScopusParser(doc);
+        //Record record = scopusParser.getCoreData();
 
 
-        System.out.println(record.getAuthorKeywords());
-        System.out.println(record.getIndexTerms() );
-        System.out.println(record.getAuthorList());
-        System.out.println(record.getTitle());
+        //System.out.println(record.getAuthorKeywords());
+        //System.out.println(record.getIndexTerms() );
+        //System.out.println(record.getAuthorList());
+        //System.out.println(record.getTitle());
 
         /*
         For debugging:

@@ -202,9 +202,14 @@ public class Record {
                 ", srctype='" + srctype + '\'' +
                 ", URL='" + URL + '\'' +
                 ", language='" + language + '\'' +
-                ", sourceId=" + sourceId +
+                ", sourceId='" + sourceId + '\'' +
                 ", citedBy=" + citedBy +
                 ", publicationYear=" + publicationYear +
+                ", authorList=" + authorList +
+                ", citedReferences=" + citedReferences +
+                ", affiliationLevel1List=" + affiliationLevel1List +
+                ", authorKeywords=" + authorKeywords +
+                ", indexTerms=" + indexTerms +
                 '}';
     }
 }
